@@ -33,8 +33,8 @@ ENV PROJECTOR_DIR /projector
 ADD projector-server $PROJECTOR_DIR/projector-server
 WORKDIR $PROJECTOR_DIR/projector-server
 ARG buildGradle
-RUN if [ "$buildGradle" = "true" ]; then ./gradlew clean; else echo "Skipping gradle build"; fi
-RUN if [ "$buildGradle" = "true" ]; then ./gradlew :projector-server:distZip; else echo "Skipping gradle build"; fi
+RUN ./gradlew clean
+RUN ./gradlew :projector-server:distZip
 RUN cd projector-server/build/distributions && find . -maxdepth 1 -type f -name projector-server-*.zip -exec mv {} projector-server.zip \;
 
 FROM debian AS projectorStaticFiles
@@ -48,7 +48,7 @@ RUN mkdir -p $PROJECTOR_DIR
 # copy IDE:
 COPY --from=ideDownloader /ide $PROJECTOR_DIR/ide
 # copy projector files to the container:
-ADD projector-docker/static $PROJECTOR_DIR
+ADD static $PROJECTOR_DIR
 # copy projector:
 COPY --from=projectorGradleBuilder $PROJECTOR_DIR/projector-server/projector-server/build/distributions/projector-server.zip $PROJECTOR_DIR
 # prepare IDE - apply projector-server:
